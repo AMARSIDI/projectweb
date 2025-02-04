@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Select Academic Year{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Select Academic Year</h6>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('select_academic_year') }}" method="POST">
+            <div class="form-group">
+                <label for="academic_year">Choose an academic year...:</label>
+                <select class="form-control" id="academic_year" name="academic_year" required>
+
+                    {% for academic_year in select_academic_years %}
+                        <option value="{{ academic_year[0] }}">{{ academic_year[1] }} ({{ academic_year[0] }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Continue</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

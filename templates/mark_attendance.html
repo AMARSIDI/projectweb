@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Mark Attendance for Course: {{ course }}</h1>
+    <form method="POST">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if students %}
+                    {% for student in students %}
+                        <tr>
+                            <td>{{ student.matricule }}</td>
+                            <td>{{ student.nom }} {{ student.prenom }}</td>
+                            <td>
+                                <select name="attendance_{{ student.matricule }}" required>
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">No students found for this department and course.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+            Submit Attendance
+        </button>
+    </form>
+{% endblock %}

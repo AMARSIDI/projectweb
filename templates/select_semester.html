@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Select Semester{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Select Semester</h6>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('process_semester') }}" method="POST">
+            <input type="hidden" name="department_id" value="{{ session.get('department_id') }}">
+            <div class="form-group">
+                <label for="semester">Choose a semester...:</label>
+                <select class="form-control" id="semester" name="semester" required>
+
+                    {% for semester in semesters %}
+                        <option value="{{ semester[0] }}">{{ semester[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Continue</button>
+            <a href="{{ url_for('select_department') }}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
