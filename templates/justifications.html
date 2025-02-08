@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Justifications d'Absences{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Justifications d'Absences</h1>
+</div>
+
+{% if justifications %}
+    <!-- Group justifications by department -->
+    {% set departments = {} %}
+    {% for justification in justifications %}
+        {% if justification['department_name'] not in departments %}
+            {% set _ = departments.update({justification['department_name']: []}) %}
+        {% endif %}
+        {% set _ = departments[justification['department_name']].append(justification) %}
+    {% endfor %}
+
+    <!-- Display justifications by department -->
+    {% for department_name, department_justifications in departments.items() %}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Département: {{ department_name }}</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for justification in department_justifications %}
+                <div class="col-xl-4 col-lg-5 col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                {{ justification['student_name'] }}
+                            </h6>
+                            <p class="mb-0"><strong>Matricule:</strong> {{ justification['matricule'] }}</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="mb-1"><strong>Cours:</strong> {{ justification['course_name'] }}</p>
+                                <p class="mb-1"><strong>Date:</strong> {{ justification['day'] }}</p>
+                                <p class="mb-1"><strong>Semaine:</strong> {{ justification['week'] }}</p>
+                                <p class="mb-1"><strong>Date de justification:</strong> {{ justification['justification_date'] }}</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="{{ url_for('static', filename=justification['justification_image_link'].replace('static/', '')) }}"
+                                     alt="Document de justification"
+                                     class="img-fluid rounded cursor-pointer"
+                                     onclick="openImageModal(this.src)"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/error-image.png') }}'"
+                                     style="max-height: 200px;">
+                            </div>
+                            <!-- Form to update justification status -->
+                            <form method="POST" action="{{ url_for('update_justification_status') }}" class="mt-3">
+                                <input type="hidden" name="justification_id" value="{{ justification['justification_id'] }}">
+                                <div class="form-group">
+                                    <label for="status_{{ justification['justification_id'] }}">Choisir une action:</label>
+                                    <select name="status" id="status_{{ justification['justification_id'] }}" class="form-control">
+                                        <option value="1">Valider la justification</option>
+                                        <option value="0">Ignorer et supprimer la justification</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Valider</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card shadow mb-4">
+        <div class="card-body text-center py-5">
+            <div class="text-gray-500">
+                <i class="fas fa-folder-open fa-3x mb-3"></i>
+                <p class="mb-0">Aucune justification trouvée.</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Document de Justification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Full size justification" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+function openImageModal(imageSrc) {
+    $('#modalImage').attr('src', imageSrc);
+    $('#imageModal').modal('show');
+}
+</script>
+{% endblock %}
+{% endblock %}

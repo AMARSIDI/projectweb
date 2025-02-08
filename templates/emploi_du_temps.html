@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Emploi du temps</h2>
+
+    <!-- Week and Department selection -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Sélection</h5>
+            <form method="GET" class="form-inline">
+                <!-- Week selection dropdown -->
+                <div class="form-group mr-3">
+                    <label for="weekSelect" class="mr-2">Semaine:</label>
+                    <select id="weekSelect" name="week" class="form-control" onchange="this.form.submit()">
+                        {% for week in weeks %}
+                        <option value="{{ week.week_number }}"
+                                {% if selected_week == week.week_number %}selected{% endif %}>
+                            Semaine {{ week.week_number }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Department selection dropdown -->
+                <div class="form-group">
+                    <label for="depSelect" class="mr-2">Département:</label>
+                    <select id="depSelect" name="dep" class="form-control" onchange="this.form.submit()">
+                        <option value="">Tous les départements</option>
+                        {% for dep in departments %}
+                        <option value="{{ dep.code_dep }}"
+                                {% if selected_dep == dep.code_dep|string %}selected{% endif %}>
+                            {{ dep.intitulé_dep }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Course Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Gestion des cours</h5>
+            <form method="POST">
+                <div class="form-row">
+                    <!-- Course selection dropdown -->
+                    <div class="col-md-3">
+                        <select name="course" class="form-control" required>
+                            <option value="">Sélectionner un cours</option>
+                            {% for course in courses %}
+                            <option value="{{ course.cours_code }}">
+                                {{ course.intitulé_cours }} ({{ course.cours_code }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Day selection dropdown -->
+                    <div class="col-md-2">
+                        <select name="day" class="form-control" required>
+                            <option value="">Jour</option>
+                            {% for day in days %}
+                            <option value="{{ day }}">{{ day }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Period selection dropdown -->
+                    <div class="col-md-2">
+                        <select name="period" class="form-control" required>
+                            <option value="">Période</option>
+                            {% for period in periods %}
+                            <option value="{{ period.replace('Période ', '') }}">{{ period }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Hidden fields for week and department -->
+                    <input type="hidden" name="week" value="{{ selected_week }}">
+                    <input type="hidden" name="dep" value="{{ selected_dep }}">
+
+                    <!-- Buttons for adding/modifying or deleting a course -->
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Ajouter/Modifier</button>
+                        <button type="submit" name="action" value="delete" class="btn btn-danger">Supprimer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule table -->
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Horaire</th>
+                    {% for day in days %}
+                    <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for period in periods %}
+                <tr>
+                    <th>{{ period }}</th>
+                    {% for day in days %}
+                    <td>
+                        {% if schedule_grid[day][period] %}
+                        <div class="course-block">
+                            <strong>{{ schedule_grid[day][period].course_code }}</strong><br>
+                            {{ schedule_grid[day][period].course_name }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .course-block {
+        background: #e9f7ef;
+        border-left: 4px solid #28a745;
+        padding: 8px;
+        margin: 2px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}

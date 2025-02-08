@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Statistiques des Absences{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800 text-center">Statistiques des Absences</h1>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <!-- Most Absent Course -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Cours avec le Plus d'Absences
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ most_absent_course.course_name }} ({{ most_absent_course.total_absences }} absences)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Absent Week -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Semaine avec le Plus d'Absences
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Semaine {{ most_absent_week.week }} ({{ most_absent_week.total_absences }} absences)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-week fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Absent Day -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Jour avec le Plus d'Absences
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ most_absent_day.day }} ({{ most_absent_day.total_absences }} absences)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Absent Period -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Période avec le Plus d'Absences
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Période {{ most_absent_period.P_ID }} ({{ most_absent_period.total_absences }} absences)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Justification Summary Card -->
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Justifications Validées
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_justified }} sur {{ total_teacher_absences }} absences ({{ justification_percentage }}%)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphs Section -->
+    <div class="row">
+        <!-- Absences by Course -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Absences par Cours</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="courseAbsencesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Absences by Day -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Absences par Jour</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="dayAbsencesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Absences by Week -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Absences par Semaine</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="weekAbsencesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Absences by Period -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Absences par Période</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="periodAbsencesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Justification Percentage Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Justifications Validées vs Non Justifiées</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="justificationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Absence Statistics by Course, Day, Week, and Period -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Statistiques par Cours, Jour, Semaine et Période</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <!-- Cours Section -->
+                <h5 class="mb-3">Cours</h5>
+                <table class="table table-bordered mb-4 table-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Nom du Cours</th>
+                            <th class="text-center">Total Absences</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in course_absence_totals %}
+                        <tr>
+                            <td class="text-center">{{ course.course_name }}</td>
+                            <td class="text-center">{{ course.total_absences }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Jours Section -->
+                <h5 class="mb-3">Jours</h5>
+                <table class="table table-bordered mb-4 table-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Jour</th>
+                            <th class="text-center">Total Absences</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in daily_absences %}
+                        <tr>
+                            <td class="text-center">{{ day.day }}</td>
+                            <td class="text-center">{{ day.total_absences }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Semaines Section -->
+                <h5 class="mb-3">Semaines</h5>
+                <table class="table table-bordered mb-4 table-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Semaine</th>
+                            <th class="text-center">Total Absences</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in weekly_absences %}
+                        <tr>
+                            <td class="text-center">{{ week.week }}</td>
+                            <td class="text-center">{{ week.total_absences }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Périodes Section -->
+                <h5 class="mb-3">Périodes</h5>
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Période</th>
+                            <th class="text-center">Total Absences</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for period in period_absences %}
+                        <tr>
+                            <td class="text-center">{{ period.P_ID }}</td>
+                            <td class="text-center">{{ period.total_absences }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('select_all') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left mr-2"></i> Retour au Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Ensure all data is defined
+    const courseLabels = {{ (course_absence_totals|map(attribute='course_name')|list or [])|tojson }};
+    const dayLabels = {{ (daily_absences|map(attribute='day')|list or [])|tojson }};
+    const weekLabels = {{ (weekly_absences|map(attribute='week')|list or [])|tojson }};
+    const periodLabels = {{ (period_absences|map(attribute='P_ID')|list or [])|tojson }};
+
+    const courseData = {{ (course_absence_totals|map(attribute='total_absences')|list or [])|tojson }};
+    const dayData = {{ (daily_absences|map(attribute='total_absences')|list or [])|tojson }};
+    const weekData = {{ (weekly_absences|map(attribute='total_absences')|list or [])|tojson }};
+    const periodPercentages = {{ (period_absences|map(attribute='absence_percentage')|list or [])|tojson }};
+
+    // Data for Justification Chart
+    // Calculate non justified count as total absences - justified absences.
+    const totalAbsences = {{ total_teacher_absences }};
+    const justifiedCount = {{ total_justified }};
+    const nonJustifiedCount = totalAbsences - justifiedCount;
+
+    // Course Absences Chart
+    if (courseLabels.length > 0 && courseData.length > 0) {
+        new Chart(document.getElementById('courseAbsencesChart'), {
+            type: 'bar',
+            data: {
+                labels: courseLabels,
+                datasets: [{
+                    label: 'Absences',
+                    data: courseData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // Day Absences Chart
+    if (dayLabels.length > 0 && dayData.length > 0) {
+        new Chart(document.getElementById('dayAbsencesChart'), {
+            type: 'bar',
+            data: {
+                labels: dayLabels,
+                datasets: [{
+                    label: 'Absences',
+                    data: dayData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // Week Absences Chart
+    if (weekLabels.length > 0 && weekData.length > 0) {
+        new Chart(document.getElementById('weekAbsencesChart'), {
+            type: 'line',
+            data: {
+                labels: weekLabels,
+                datasets: [{
+                    label: 'Absences',
+                    data: weekData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // Period Absences Chart (Pie Chart)
+    if (periodLabels.length > 0 && periodPercentages.length > 0) {
+        new Chart(document.getElementById('periodAbsencesChart'), {
+            type: 'pie',
+            data: {
+                labels: periodLabels,
+                datasets: [{
+                    label: 'Absences (%)',
+                    data: periodPercentages,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                label += context.raw + '%';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Justification Chart (Pie Chart)
+    new Chart(document.getElementById('justificationChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Justifiées', 'Non Justifiées'],
+            datasets: [{
+                label: 'Justifications',
+                data: [justifiedCount, nonJustifiedCount],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.2)',   // green for justified
+                    'rgba(220, 53, 69, 0.2)'    // red for non-justified
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            label += context.raw;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

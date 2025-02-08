@@ -1,61 +1,238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{% block title %}Dashboard{% endblock %}</title>
+    <title>{% block title %}Tableau de bord{% endblock %}</title>
 
-    <!-- Custom fonts -->
+    <!-- Custom Fonts -->
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-    <!-- Custom styles -->
+    <!-- Custom Styles -->
     <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
+
+    <!-- Custom CSS for Fixed Sidebar and Topbar -->
+    <style>
+        :root {
+            --sidebar-width: 223px;
+            --topbar-height: 56px;
+            --sidebar-bg: #00695C; /* Deep teal for sidebar */
+            --topbar-bg: #2C3E50; /* Dark gray for topbar */
+            --content-bg: #F8F8F8; /* Off-white for content */
+            --accent-yellow: #FFC107; /* Vibrant yellow for accents */
+            --accent-blue: #42A5F5; /* Soft blue for interactive elements */
+            --text-dark: #333333; /* Dark gray for text */
+            --text-light: #FFFFFF; /* White for text on dark backgrounds */
+        }
+
+        /* Fix the sidebar */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease, width 0.3s ease;
+            background-color: var(--sidebar-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Thin sidebar state */
+        #sidebar.thin {
+            width: 60px;
+        }
+
+        /* Ensure sidebar content doesn't overflow */
+        #sidebar .navbar-nav {
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        /* Sidebar links */
+        #sidebar .nav-link {
+            color: var(--text-light) !important;
+            padding: 0.75rem 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar headings */
+        #sidebar .sidebar-heading {
+            color: var(--text-light) !important;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Fix the top navigation bar */
+        #topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--topbar-height);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            background-color: var(--topbar-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Topbar text and icons */
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--accent-yellow) !important;
+        }
+
+        /* Adjust the main content to account for fixed sidebar and topbar */
+        #content-wrapper {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            background-color: var(--content-bg);
+            min-height: calc(100vh - var(--topbar-height));
+        }
+
+        /* Ensure the footer is not hidden */
+        footer.sticky-footer {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            background-color: var(--topbar-bg);
+            color: var(--text-light);
+            padding: 10px 0;
+        }
+
+        /* Sidebar toggle for smaller screens */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #topbar {
+                left: 0;
+            }
+
+            #content-wrapper {
+                margin-left: 0;
+            }
+
+            footer.sticky-footer {
+                margin-left: 0;
+            }
+
+            #sidebar.active {
+                transform: translateX(0);
+            }
+
+            #topbar.active {
+                left: var(--sidebar-width);
+            }
+
+            #content-wrapper.active {
+                margin-left: var(--sidebar-width);
+            }
+
+            footer.sticky-footer.active {
+                margin-left: var(--sidebar-width);
+            }
+        }
+
+        /* Accent buttons and interactive elements */
+        .btn-primary {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: #1E88E5;
+            border-color: #1E88E5;
+        }
+
+        .btn-warning {
+            background-color: var(--accent-yellow);
+            border-color: var(--accent-yellow);
+        }
+
+        .btn-warning:hover {
+            background-color: #FFB300;
+            border-color: #FFB300;
+        }
+    </style>
+
     {% block extra_css %}{% endblock %}
 </head>
-
 <body id="page-top">
     <div id="wrapper">
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('dashboard') }}">
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="sidebar">
+            <!-- Sidebar Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('select_all') }}">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Attendance System</div>
+                <div class="sidebar-brand-text mx-3">Système de Présence</div>
             </a>
 
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('dashboard') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+            {% if session.get('user_email') == 'mouhammed.leminoubeid@isms.esp.mr' %}
+                <!-- ADMIN: Only show Emploi du temps -->
+                <div class="sidebar-heading">Gestion des Horaires</div>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('emploi_du_temps') }}">
+                        <i class="fas fa-fw fa-calendar-alt"></i>
+                        <span>Emploi du temps</span>
+                    </a>
+                </li>
+            {% else %}
+                <!-- NON-ADMIN: Do not show Emploi du temps -->
+                <!-- Other sidebar links for non-admin users -->
+                <div class="sidebar-heading">Analyse</div>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('statistique') }}">
+                        <i class="fas fa-fw fa-chart-line"></i>
+                        <span>Statistiques</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('view_justifications') }}">
+                        <i class="fas fa-fw fa-file-medical"></i>
+                        <span>Justifications</span>
+                    </a>
+                </li>
+                <div class="sidebar-heading">Gestion des Présences</div>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('select_all') }}">
+                        <i class="fas fa-fw fa-calendar-check"></i>
+                        <span>Faire l'appel</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('tables') }}">
+                        <i class="fas fa-fw fa-table"></i>
+                        <span>Tableau des Absences</span>
+                    </a>
+                </li>
+            {% endif %}
 
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Attendance Management
-            </div>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-           <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('select_course') }}">
-                    <i class="fas fa-fw fa-calendar-check"></i>
-                    <span>Absence</span>
-                </a>
-            </li>
-
-            <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Sidebar Toggler -->
+            <!-- Sidebar Toggle -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
@@ -63,83 +240,74 @@
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Main Content -->
-            <div id="content">
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow" id="topbar">
+                <!-- Sidebar Toggle (Topbar) -->
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
 
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <div class="topbar-divider d-none d-sm-block"></div>
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ session.get('username', 'User') }}</span>
-                                <img class="img-profile rounded-circle" src="{{ url_for('static', filename='img/undraw_profile.svg') }}">
-                            </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </nav>
+                <!-- Topbar Navigation -->
+                <ul class="navbar-nav ml-auto">
+                    <div class="topbar-divider d-none d-sm-block"></div>
+                    <!-- User Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="{{ url_for('profile') }}" id="userDropdown" role="button">
+                            <span class="mr-2 d-none d-lg-inline text-gray-800 small">{{ session.get('username', 'Utilisateur') }}</span>
+                            <img class="img-profile rounded-circle" src="{{ url_for('static', filename='img/undraw_profile.svg') }}">
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-                    {% block content %}{% endblock %}
-                </div>
+            <!-- Page Content -->
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
             </div>
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Attendance System 2024</span>
+                        <span>Copyright &copy; Système de Présence 2024</span>
                     </div>
                 </div>
             </footer>
         </div>
     </div>
 
-    <!-- Scroll to Top Button-->
+    <!-- Scroll to Top Button -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Core JavaScript-->
+    <!-- Core JavaScript -->
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- Custom scripts -->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
-    
-    <!-- Page level plugins -->
-    <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js') }}"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarToggle = document.getElementById('sidebarToggleTop');
+            const sidebar = document.getElementById('sidebar');
+            const topbar = document.getElementById('topbar');
+            const contentWrapper = document.getElementById('content-wrapper');
+            const footer = document.querySelector('footer.sticky-footer');
+
+            if (sidebarToggle && sidebar && topbar && contentWrapper && footer) {
+                sidebarToggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('active');
+                    topbar.classList.toggle('active');
+                    contentWrapper.classList.toggle('active');
+                    footer.classList.toggle('active');
+                });
+            } else {
+                console.error('One or more elements not found!');
+            }
+        });
+    </script>
 
     {% block extra_scripts %}{% endblock %}
 </body>

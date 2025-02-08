@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Sélection du cours</h2>
+    
+    <!-- Display the current week -->
+    <div class="alert alert-info mb-4">
+        Semaine actuelle: <strong>{{ selected_week }}</strong>
+    </div>
+
+    {% if scheduled_course %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Cours programmé pour ce créneau</h5>
+                <p class="card-text">
+                    Cours: {{ scheduled_course.intitulé_cours }}<br>
+                    Semaine: {{ selected_week }}<br>
+                    Jour: {{ current_day }}<br>
+                    Période: {{ current_period }}
+                </p>
+                <form method="POST">
+                    <button type="submit" class="btn btn-primary">Utiliser ce cours</button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Aucun cours prévu pour ce créneau horaire. Veuillez sélectionner manuellement.
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Sélection manuelle</h5>
+                <form method="POST">
+                    <div class="form-group mb-3">
+                        <label for="manual_course">Cours</label>
+                        <select class="form-control" id="manual_course" name="manual_course" required>
+                            <option value="">Sélectionnez un cours</option>
+                            {% for course in courses %}
+                            <option value="{{ course.cours_code }}">
+                                {{ course.cours_code }} - {{ course.intitulé_cours }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="manual_week">Semaine</label>
+                        <select class="form-control" id="manual_week" name="manual_week" required>
+                            <option value="">Sélectionnez une semaine</option>
+                            {% for week in weeks %}
+                            <option value="{{ week.week_number }}" {% if week.week_number == (manual_week or selected_week) %}selected{% endif %}>
+                                Semaine {{ week.week_number }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="manual_day">Jour</label>
+                        <select class="form-control" id="manual_day" name="manual_day" required>
+                            <option value="">Sélectionnez un jour</option>
+                            {% for day in days %}
+                            <option value="{{ day.day_name }}" {% if day.day_name == (manual_day or current_day) %}selected{% endif %}>
+                                {{ day.day_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="manual_period">Période</label>
+                        <select class="form-control" id="manual_period" name="manual_period" required>
+                            <option value="">Sélectionnez une période</option>
+                            {% for p in p_values %}
+                            <option value="{{ p.p_name }}" {% if p.p_name == (manual_period or current_period|string) %}selected{% endif %}>
+                                Période {{ p.p_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

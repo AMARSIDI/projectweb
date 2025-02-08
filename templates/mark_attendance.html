@@ -1,39 +1,108 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>Mark Attendance for Course: {{ course }}</h1>
-    <form method="POST">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead>
+<div class="container mt-4">
+    <!-- Flash Messages Section -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h3 class="mb-4">Marquer la présence</h3>
+
+    <form method="POST" action="{{ url_for('mark_attendance') }}">
+        <div class="mb-3">
+            <h4>Cours : <span class="text-primary">{{ selected_course_name }} ({{ selected_course }})</span></h4>
+            <p><strong>Semaine :</strong> {{ week }}</p>
+            <p><strong>Jour :</strong> {{ day }}</p>
+            <p><strong>Période :</strong> {{ period }}</p>
+        </div>
+
+        <table class="table table-bordered table-hover attendance-table">
+            <thead class="table-dark">
                 <tr>
-                    <th>Matricule</th>
-                    <th>Name</th>
-                    <th>Attendance</th>
+                    <th class="text-center">Matricule</th>
+                    <th class="text-center">Nom</th>
+                    <th class="text-center">Statut</th>
                 </tr>
             </thead>
             <tbody>
-                {% if students %}
-                    {% for student in students %}
-                        <tr>
-                            <td>{{ student.matricule }}</td>
-                            <td>{{ student.nom }} {{ student.prenom }}</td>
-                            <td>
-                                <select name="attendance_{{ student.matricule }}" required>
-                                    <option value="present">Present</option>
-                                    <option value="absent">Absent</option>
-                                </select>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+                {% for student in students %}
                     <tr>
-                        <td colspan="3">No students found for this department and course.</td>
+                        <td class="text-center align-middle">{{ student.matricule }}</td>
+                        <td class="text-center align-middle">{{ student.nom_prenom }}</td>
+                        <td class="text-center align-middle">
+                            <button type="button"
+                                    class="btn attendance-toggle btn-success"
+                                    data-matricule="{{ student.matricule }}"
+                                    data-status="0">
+                                Présent
+                            </button>
+                        </td>
                     </tr>
-                {% endif %}
+                {% endfor %}
             </tbody>
         </table>
-        <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
-            Submit Attendance
-        </button>
+
+        <button type="submit" class="btn btn-primary mt-3">Enregistrer la présence</button>
     </form>
+</div>
+
+<script>
+    // Toggle attendance status on button click
+    document.querySelectorAll('.attendance-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStatus = this.getAttribute('data-status');
+            const newStatus = currentStatus === "0" ? "1" : "0";
+            const newText = newStatus === "0" ? "Présent" : "Absent";
+
+            // Update button text and data-status attribute
+            this.textContent = newText;
+            this.setAttribute('data-status', newStatus);
+
+            // Update button color
+            this.classList.remove('btn-success', 'btn-danger');
+            this.classList.add(newStatus === "0" ? 'btn-success' : 'btn-danger');
+        });
+    });
+
+    // Handle form submission
+    document.querySelector('form').addEventListener('submit', function(event) {
+        // Prevent the form from submitting immediately
+        event.preventDefault();
+
+        // Create a FormData object to store the form data
+        const formData = new FormData();
+
+        // Loop through all buttons and add their status to the FormData
+        document.querySelectorAll('.attendance-toggle').forEach(button => {
+            const matricule = button.getAttribute('data-matricule');
+            const status = button.getAttribute('data-status');
+            formData.append(`attendance_${matricule}`, status);
+        });
+
+        // Submit the form data using fetch
+        fetch(this.action, {
+            method: this.method,
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = response.url; // Redirect if needed
+            } else {
+                alert("Erreur lors de l'enregistrement des données.");
+            }
+        })
+        .catch(error => {
+            console.error("Erreur:", error);
+        });
+    });
+</script>
+
 {% endblock %}
